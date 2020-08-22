@@ -6,11 +6,17 @@ from bs4 import BeautifulSoup
 # 用于解决爬取的数据格式化
 import io
 import sys
+# 表格
+import xlsxwriter
+import datetime
+import time
+
+startTime1 = time.time()
 
 keyword='实训平台'
 print(keyword)
 keyword=urllib.parse.quote(keyword)
-print(keyword)
+# print(keyword)
 
 url='http://search.ccgp.gov.cn/bxsearch?searchtype=1&page_index=1' \
     '&start_time=&end_time=&timeType=2&searchparam=&searchchannel=0&dbselect=bidx&' \
@@ -29,9 +35,37 @@ bs = BeautifulSoup(result,'html.parser')
 # print("解析后的数据")
 # print(bs.span)
 
-# 获取已爬取内容中的td标签内容
-data=bs.find_all('a')
-print(data)
-# 循环打印输出
+# 获取已爬取内容中的a标签内容
+obj=bs.find_all('div',{'class':'vT-srch-result'})
+data=obj[0].find_all('a')
+# print(data)
+projects=[]
+# 循环处理数据
 for i in data:
-    print(i.text)
+    if(i['href']!='javascript:void(0)'):
+        projects.append([i.text.strip(), i['href']])
+
+# print(projects)
+# print(len(projects))
+
+workbook = xlsxwriter.Workbook('d:\zhaobiao-0822-2.xlsx')  #创建一个Excel文件
+worksheet = workbook.add_worksheet()               #创建一个sheet
+
+title = [U'标题',U'链接']     #表格title
+worksheet.write_row('A1',title)                    #title 写入Excel
+
+for i in range(len(projects)):
+    num0 = str(i+2)
+    name = str(projects[i][0])
+    link = str(projects[i][1])
+    row = 'A' + num0
+    data = [name,link,]
+    worksheet.write_row(row, data)
+    i+=1
+
+workbook.close()
+
+endTime1 = time.time()
+
+print(endTime1-startTime1)
+
